@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <deque>
-
 using namespace std;
 class fiber
 {
@@ -10,9 +9,11 @@ private:
     Context context_;
     char *stack_bottom_;
     char *stack_top_;
+    // ptr to shared data
+    int *data_ptr_;
 
 public:
-    fiber(void (*function)())
+    fiber(void (*function)(), int *data_ptr = nullptr) : data_ptr_(data_ptr)
     {
         // Create stack
         stack_bottom_ = new char[4096];
@@ -32,9 +33,16 @@ public:
         delete[] stack_bottom_;
     }
 
-    Context get_context()
+    Context* get_context()
     {
-        return context_;
+        return &context_;
+    }
+    int *get_data() const
+    {
+        return data_ptr_;
+    }
+    void switch_to_scheduler(Context* scheduler_context){
+        swap_context(&context_, scheduler_context);
     }
 };
 
@@ -43,9 +51,11 @@ class scheduler
 private:
     deque<fiber *> fibers_;
     Context *context_;
+    // ptr to current fiber
+    fiber *current_fiber_;
 
 public:
-    scheduler() : context_(nullptr) {}
+    scheduler() : context_(nullptr), current_fiber_(nullptr) {}
 
     ~scheduler()
     { // Delete fibers
@@ -70,11 +80,12 @@ public:
             while (!fibers_.empty())
             {
                 // FIFO remove fiber from front of queue
-                fiber *f = fibers_.front();
-                fibers_.pop_front();
-                Context c = f->get_context();
+                current_fiber_ = fibers_.front();
+                fibers_.pop_front();               
                 // Switch context
-                set_context(&c);
+                set_context(current_fiber_->get_context());
+                // reset ptr after fiber has finished
+                current_fiber_ = nullptr;
             }
         }
     }
@@ -82,43 +93,20 @@ public:
     { // Calling set context with saved context
         set_context(context_);
     }
+    int *get_data() const
+    {
+        if (current_fiber_)
+        {
+            return current_fiber_->get_data();
+        }
+        return nullptr;
+    }
+    void yield(){
+        if(current_fiber_){
+            fibers_.push_back(current_fiber_);
+            current_fiber_->switch_to_scheduler(context_);
+            
+        }
+
+    }
 };
-
-void foo()
-{
-    cout << "You called foo"
-         << endl;
-    exit(EXIT_SUCCESS);
-    // set_context(&gooContext);
-}
-void goo()
-{
-    cout << "You called goo" << endl;
-    exit(EXIT_SUCCESS);
-}
-// Define scheduler as global
-scheduler s;
-void func1()
-{
-    cout << "Fiber 1" << endl;
-    s.fiber_exit();
-}
-void func2()
-{
-    cout << "Fiber 2" << endl;
-    s.fiber_exit();
-}
-
-int main()
-{
-    // Create fibers with foo
-    fiber f2(func2);
-    fiber f1(func1);
-    // spawn fibers (push on queue)
-    s.spawn(&f1);
-    s.spawn(&f2);
-
-    s.do_it();
-
-    return 0;
-}
