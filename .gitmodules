@@ -1,0 +1,3 @@
+[submodule "external/simpletest"]
+	path = external/simpletest
+	url = https://github.com/kudaba/simpletest
