@@ -6,6 +6,7 @@
 #include "scheduler.hpp"
 
 using namespace std;
+// Example demonstrates the fibers yielding to the next process in queue before they are next scheduled for execution
 
 // Define scheduler as global
 scheduler s;

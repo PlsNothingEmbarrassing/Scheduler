@@ -1,7 +1,7 @@
 #include "context.hpp"
 #include <cstdlib>
 #include <iostream>
-
+// To compile file: clang++ -std=c++17 task_1.cpp context.o
 using namespace std;
 // Global contexts for switching
 Context gooContext;
@@ -11,6 +11,7 @@ void foo()
 {
     cout << "You called foo"
          << endl;
+    // Switch to goo
     set_context(&gooContext);
 }
 void goo()

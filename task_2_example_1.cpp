@@ -38,58 +38,13 @@ public:
     }
 };
 
-class scheduler
-{
-private:
-    deque<fiber *> fibers_;
-    Context *context_;
-
-public:
-    scheduler() = default;
-
-    ~scheduler()
-    { // Delete fibers
-        for (fiber *f : fibers_)
-        {
-            delete f;
-        }
-        // clear deque
-        fibers_.clear();
-    }
-    void spawn(fiber *f)
-    {
-        fibers_.push_back(f);
-    }
-    void do_it()
-    {
-        Context s_context;
-        context_ = &s_context;
-        if (get_context(context_) == 0)
-        {
-            // while not empty
-            while (!fibers_.empty())
-            {
-                // FIFO remove fiber from front of queue
-                fiber *f = fibers_.front();
-                fibers_.pop_front();
-
-                Context c = f->get_context();
-                set_context(&c);
-            }
-        }
-    }
-    void fiber_exit()
-    {
-        set_context(context_);
-    }
-};
 
 void foo()
 {
     cout << "You called foo"
          << endl;
     exit(EXIT_SUCCESS);
-    // set_context(&gooContext);
+    
 }
 void goo()
 {
@@ -97,18 +52,6 @@ void goo()
     exit(EXIT_SUCCESS);
 }
 
-// void func1()
-// {
-//     cout << "Fiber 1" << endl;
-//     s.fiber_exit();
-// }
-// void func2()
-// {
-//     cout << "Fiber 2" << endl;
-//     s.fiber_exit();
-// }
-// Define scheduler as global
-// scheduler s;
 
 int main()
 {

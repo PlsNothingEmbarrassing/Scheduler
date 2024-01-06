@@ -3,19 +3,16 @@
 #include "context.hpp"
 #include <cstdlib>
 #include <iostream>
+#include <functional>
+// Fiber api source code
+
+
 // Fiber constructor
 fiber::fiber(void (*function)(), int *data_ptr) : data_ptr_(data_ptr) {
-        // Create stack
-        stack_bottom_ = new char[4096];
-        stack_top_ = stack_bottom_ + 4096;
-        // Setup stack and align
-        uintptr_t int_sp = reinterpret_cast<uintptr_t>(stack_top_);
-        int_sp &= -16L; // Align boundary
-        int_sp -= 128;  // Add red zone
-        stack_top_ = reinterpret_cast<char *>(int_sp);
+        initialise_stack();
         // Set context
         context_.rip = reinterpret_cast<void *>(function);
-        context_.rsp = reinterpret_cast<void *>(stack_top_);
+        context_.rsp = reinterpret_cast<void *>(stack_top_);        
     };
 // Fiber deconstructor
 fiber::~fiber(){
@@ -35,6 +32,17 @@ int* fiber::get_data() const
 void fiber::switch_to_scheduler(Context* scheduler_context){
         swap_context(&context_, scheduler_context);
     }
+
+void fiber::initialise_stack(){
+    // Create stack
+        stack_bottom_ = new char[4096];
+        stack_top_ = stack_bottom_ + 4096;
+        // Setup stack and align
+        uintptr_t int_sp = reinterpret_cast<uintptr_t>(stack_top_);
+        int_sp &= -16L; // Align boundary
+        int_sp -= 128;  // Add red zone
+        stack_top_ = reinterpret_cast<char *>(int_sp);
+}
 // Scheduler constructor
 scheduler::scheduler() : context_(nullptr), current_fiber_(nullptr) {}
 // Scheduler deconstructor

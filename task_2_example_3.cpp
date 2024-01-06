@@ -10,9 +10,11 @@ private:
     Context context_;
     char *stack_bottom_;
     char *stack_top_;
+    // ptr to shared data
+    int *data_ptr_;
 
 public:
-    fiber(void (*function)())
+    fiber(void (*function)(), int *data_ptr = nullptr) : data_ptr_(data_ptr)
     {
         // Create stack
         stack_bottom_ = new char[4096];
@@ -36,6 +38,10 @@ public:
     {
         return context_;
     }
+    int *get_data() const
+    {
+        return data_ptr_;
+    }
 };
 
 class scheduler
@@ -43,9 +49,11 @@ class scheduler
 private:
     deque<fiber *> fibers_;
     Context *context_;
+    // ptr to current fiber
+    fiber *current_fiber_;
 
 public:
-    scheduler() : context_(nullptr) {}
+    scheduler() : context_(nullptr), current_fiber_(nullptr) {}
 
     ~scheduler()
     { // Delete fibers
@@ -70,17 +78,27 @@ public:
             while (!fibers_.empty())
             {
                 // FIFO remove fiber from front of queue
-                fiber *f = fibers_.front();
+                current_fiber_ = fibers_.front();
                 fibers_.pop_front();
-                Context c = f->get_context();
+                Context c = current_fiber_->get_context();
                 // Switch context
                 set_context(&c);
+                // reset ptr after fiber has finished
+                current_fiber_ = nullptr;
             }
         }
     }
     void fiber_exit()
     { // Calling set context with saved context
         set_context(context_);
+    }
+    int *get_data() const
+    {
+        if (current_fiber_)
+        {
+            return current_fiber_->get_data();
+        }
+        return nullptr;
     }
 };
 
@@ -89,7 +107,7 @@ void foo()
     cout << "You called foo"
          << endl;
     exit(EXIT_SUCCESS);
-    // set_context(&gooContext);
+    
 }
 void goo()
 {
@@ -101,19 +119,26 @@ scheduler s;
 void func1()
 {
     cout << "Fiber 1" << endl;
+    int *dp = s.get_data();
+    cout << "Fiber 1: " << *dp << endl;
+    *dp += 1;
     s.fiber_exit();
 }
 void func2()
 {
-    cout << "Fiber 2" << endl;
+    int *dp = s.get_data();
+    cout
+        << "Fiber 2: " << *dp << endl;
     s.fiber_exit();
 }
 
 int main()
 {
     // Create fibers with foo
-    fiber f2(func2);
-    fiber f1(func1);
+    int x = 10;
+    int *dataPtr = &x;
+    fiber f2(func2, dataPtr);
+    fiber f1(func1, dataPtr);
     // spawn fibers (push on queue)
     s.spawn(&f1);
     s.spawn(&f2);

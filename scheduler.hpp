@@ -3,7 +3,7 @@
 
 #include "fiber.hpp"
 #include <deque>
-
+// Scheduler class definition
 class scheduler {
 public:
     scheduler();

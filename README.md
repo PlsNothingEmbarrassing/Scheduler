@@ -1,93 +1,63 @@
 # ASP Assignment
 
+## Fiber API implementation
 
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.uwe.ac.uk/j5-hutton/asp-assignment.git
-git branch -M main
-git push -uf origin main
-```
-
-## Integrate with your tools
-
-- [ ] [Set up project integrations](https://gitlab.uwe.ac.uk/j5-hutton/asp-assignment/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
 
 ## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+This repo contains solutions to the tasks specified in the assignment brief.
+The final product of this assignment is a simple runtime that can support cooperative tasks running within a single thread which is provided with the fiber and scheduler classes which provide the following functions:
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+- fiber_exit() - Terminates a fiber. Fiber returns control to the scheduler.
+- get_data() - Returns the pointer to data passed in at fiber creation. Will return nullptr if no data ptr passed.
+- yield() - Yields control back to the scheduler, fiber execution state is saved for resumption after being requeued.
+- spawn() - Creates new task for execution by pushing fiber onto the scheduler queue. If called from outside of an executing fiber then the task will be added to queue but will not run until do_it() is called. If spawn is called within an executing fiber then the task will be added to the queue and executed when it is reached by the scheduler.
+- do_it() - Runs the queued fibers and will return back when all queued fibers have completed.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## Task 1
+Task 1 involved setting up the stack and basic use of the context switching api. (Link to repo for context switching api [here](https://gitlab.uwe.ac.uk/br-gaster/context))
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Code for the first pseudocode example can be found [here](task_1_example_1.cpp) which can be compiled with: clang++ -std=c++17 task_1_example_1.cpp context.o.
+The output of the file can be seen [here](screenshots/part_1_example_1.png)
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+The next part of task 1 was setting up the stack for Sys V ABI alignment and layout and demonstrating switching between "fiber" contexts. Code for the second pseudocode example can be found [here](task_1_example_2.cpp) and also [a screenshot of the output.](screenshots/part_1_example_2.png)
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+## Task 2
+After simulating the behaviour of fibers in the previous task, task 2 involved creating a class to represent a fiber and additionally a scheduler class.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+The first part of this task was to rework the "foo" example in task 1 to demonstrate our new fiber class. The code for this example is found in [task_2_example_1](task_2_example_1.cpp) and also screenshot of [output.](part_2_example_1.png)
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+The next part of this task was to create a scheduler class to queue and execute fibers in a round robin fashion. We were recommended in the assignment brief to use std::deque for the queue.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+For the second pseudocode example we were tasked to demonstrate our scheduler running two fibers consecutively by spawning (pushing onto the queue) and then running them with do_it and having the fibers return control to the scheduler by calling fiber_exit(). The code for this part of the task can be found in [task_2_example_2](task_2_example_2.cpp) and also [a screenshot of the output.](screenshots/part_2_example_2.png) In reply to the question of "Why did we make s global" on the assignment brief, I would say it is because it would be pretty annoying to call s.fiber_exit() from inside a fiber if s had been declared locally within main, without having to modify the fiber class to access the scheduler methods etc. (I'm sure there are other ways of doing it.)
 
-## License
-For open source projects, say how it is licensed.
+The final pseudocode example is meant for us to demonstrate fibers cooperating to do something (in this case modify an integer value). A pointer to an integer is passed to both fibers on creation, and as it is passed by reference, both fibers are able to modify the contents. The code for this can be found in [task_2_example_3](task_2_example_3.cpp) with accompanying screenshots of [output](screenshots/part_2_example_3.png).
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+
+## Task 3
+For task 3 we were asked to implement the yield function, which when called would suspend the currently executing fiber, save the stack pointer and pointer to function body and then requeue the fiber at the back of the queue to be executed when its' time comes. I did waste some time attempting to have a fiber constructor for lambda functions because I thought it would neaten up the testing file but it kept getting seg faults and wasn't sure why so binned it.
+
+The class definitions for fiber and scheduler can be found in their respective header files, [fiber.hpp](fiber.hpp) and [scheduler.hpp](scheduler.hpp), and the source code for the api is stored in [fibers.cpp](fibers.cpp). There are also class diagrams of both below.
+
+![Class diagrams of fiber and scheduler class.](screenshots/class_diagrams.png)
+
+For testing my "yield" function as well as my scheduler and fiber classes, I used the [simpletest](https://github.com/kudaba/simpletest) framework for simple unit tests.
+
+Basic Fiber Execution Test - Creates fiber and pass data on creation. Validates that fiber can retrieve and modify passed data.
+
+Mutiple FIber Execution Test - Spawns mutiple fibers and validates that they run and that if a call to get_data() after do_it() has concluded that a nullptr is returned.
+
+Yield Test - Spawns 2 fibers and pass them both pointers to the same data. Data is modified within the first fibers body, output the data value, then yield. The other fiber increments the integer and outputs the value before the first fiber is resumed to modify the value a final time by a different amount. The output is captured to validate that the data is modified in the correct order. 
+
+Spawn from Fiber - Initialise a fiber which will then spawn another from within its function body. The second spawned fiber should be able to modify the passed data value and the result is validated.
+
+Tests can be run using: clang++ -std=c++17 -o task_3_tests -I external/simpletest task_3_tests.cpp fibers.cpp context.o external/simpletest/simpletest.cpp
+
+
+
+
+
+
+
+
